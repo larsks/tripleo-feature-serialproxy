@@ -1,0 +1,62 @@
+#!/bin/bash
+
+OPTS=$(getopt -o "urR" --long "update,rebase,review" -n "push-all" -- "$@")
+eval set -- "$OPTS"
+unset OPTS
+
+while :; do
+	case $1 in
+		(-u|--update)
+			flag_update=1
+			shift
+			;;
+
+		(-r|--rebase)
+			flag_rebase=1
+			shift
+			;;
+
+		(-R|--review)
+			flag_review=1
+			shift
+			;;
+
+		(--)	shift
+			break
+			;;
+	esac
+done
+
+branch=$(cat branch)
+
+for repo in */.git; do
+	repo=${repo%/.git}
+	echo "Processing $repo..."
+(
+	cd $repo
+	if [[ $flag_update ]]; then
+		git remote update --prune > /dev/null
+	fi
+
+	local_branch=$(git rev-parse --abbrev-ref HEAD)
+	if [[ $local_branch != $branch ]]; then
+		echo "* ERROR: $repo: repository is on the wrong branch" >&2
+		exit 1
+	fi
+
+	parent=$(git rev-parse HEAD^)
+	remote_master=$(git rev-parse origin/master)
+	if [[ $parent != $remote_master ]]; then
+		if [[ $flag_rebase ]]; then
+			if ! git rebase origin/master; then
+				echo "* ERROR: $repo: rebase failed" >&2
+				exit 1
+			fi
+		else
+			echo "* ERROR: $repo: repository needs rebase" >&2
+			exit 1
+		fi
+	fi
+
+) || exit 1
+done

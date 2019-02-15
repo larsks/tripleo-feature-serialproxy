@@ -1,0 +1,12 @@
+[submodule "puppet-nova"]
+	path = puppet-nova
+	url = https://github.com/larsks/puppet-nova.git
+[submodule "puppet-tripleo"]
+	path = puppet-tripleo
+	url = https://github.com/larsks/puppet-tripleo.git
+[submodule "tripleo-common"]
+	path = tripleo-common
+	url = https://github.com/larsks/tripleo-common.git
+[submodule "tripleo-heat-templates"]
+	path = tripleo-heat-templates
+	url = https://github.com/larsks/tripleo-heat-templates.git
